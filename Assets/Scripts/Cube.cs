@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -6,10 +7,11 @@ using UnityEngine;
 
 public class Cube : MonoBehaviour
 {
-    public event Action<GameObject> TouchedPlatform;
+    public event Action<Cube> Died;
 
     private Rigidbody _rigidbody;
     private Renderer _renderer;
+    private Coroutine _coroutineDie;
 
     private const string _platformTag = "Platform";
     private bool _hasTouchedPlatform;
@@ -24,14 +26,15 @@ public class Cube : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag(_platformTag))
+        if (_hasTouchedPlatform == false)
         {
-            if(_hasTouchedPlatform == false)
+            if (collision.gameObject.TryGetComponent<Platform>(out Platform platform))
+            {
                 _renderer.material.color = UnityEngine.Random.ColorHSV();
-    
-            _hasTouchedPlatform = true;
+                _hasTouchedPlatform = true;
 
-            TouchedPlatform?.Invoke(gameObject);
+                _coroutineDie = StartCoroutine(Die());
+            }
         }
     }
 
@@ -42,28 +45,28 @@ public class Cube : MonoBehaviour
 
     private void SetDefaultSettings()
     {
-        Vector3 position;
-
-        float minPositionX = -5;
-        float maxPositionX = 5;
-
-        float minPositionZ = -5;
-        float maxPositionZ = 5;
-
-        float PositionX = UnityEngine.Random.Range(minPositionX, maxPositionX);
-        float PositionY = 20;
-        float PositionZ = UnityEngine.Random.Range(minPositionZ, maxPositionZ);
-
         Color color = Color.white;
-
-        position = new Vector3(PositionX, PositionY, PositionZ);
 
         _hasTouchedPlatform = false;
 
-        transform.position = position;
         transform.rotation = Quaternion.identity;
         _rigidbody.velocity = Vector3.zero;
         _rigidbody.angularVelocity = Vector3.zero;
         _renderer.material.color = color;
+    }
+
+    private IEnumerator Die()
+    {
+        WaitForSeconds wait;
+
+        float minDelay = 2;
+        float maxDelay = 5;
+        float delay = UnityEngine.Random.Range(minDelay, maxDelay);
+
+        wait = new WaitForSeconds(delay);
+
+        yield return wait;
+
+        Died?.Invoke(this);
     }
 }
