@@ -7,13 +7,14 @@ using UnityEngine;
 
 public class Cube : MonoBehaviour
 {
+    [SerializeField]private ColorChanger _colorChanger;
+
     public event Action<Cube> Died;
 
     private Rigidbody _rigidbody;
     private Renderer _renderer;
     private Coroutine _coroutineDie;
-
-    private const string _platformTag = "Platform";
+    
     private bool _hasTouchedPlatform;
 
     private void Awake()
@@ -30,7 +31,7 @@ public class Cube : MonoBehaviour
         {
             if (collision.gameObject.TryGetComponent<Platform>(out Platform platform))
             {
-                _renderer.material.color = UnityEngine.Random.ColorHSV();
+                _colorChanger.ChangeColor(_renderer);
                 _hasTouchedPlatform = true;
 
                 _coroutineDie = StartCoroutine(Die());

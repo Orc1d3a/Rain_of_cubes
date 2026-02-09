@@ -3,17 +3,14 @@ using UnityEngine.Pool;
 
 public class Pool : MonoBehaviour
 {
-    [SerializeField] private GameObject _cubePrefab;
-    private Cube _cube;
+    [SerializeField] private Cube _cubePrefab;
     
     private ObjectPool<Cube> _pool;
 
     private void Awake()
     {
-        _cube = _cubePrefab.GetComponent<Cube>();
-
         _pool = new ObjectPool<Cube>(
-            createFunc: () => Instantiate(_cube),
+            createFunc: () => Instantiate(_cubePrefab),
             actionOnGet: (cube) => cube.gameObject.SetActive(true),
             actionOnRelease: (cube) => cube.gameObject.SetActive(false),
             actionOnDestroy: (cube) => Destroy(cube.gameObject)            
